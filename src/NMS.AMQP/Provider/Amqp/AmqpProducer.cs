@@ -53,7 +53,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             };
 
             string linkName = info.Id + ":" + target.Address;
-            var taskCompletionSource = new TaskCompletionSource<bool>();
+            TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
             senderLink = new SenderLink(session.UnderlyingSession, linkName, frame, (link, attach) => { taskCompletionSource.SetResult(true); });
 
             senderLink.AddClosedCallback((sender, error) =>
