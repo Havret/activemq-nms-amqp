@@ -32,5 +32,38 @@ namespace NMS.AMQP.Test.Meta
             Assert.AreSame(firstId, info.Id);
             Assert.NotNull(info.ToString());
         }
+
+        [Test]
+        public void TestHashCode()
+        {
+            var first = new NmsConnectionInfo(firstId);
+            var second = new NmsConnectionInfo(secondId);
+            
+            Assert.AreEqual(first.GetHashCode(), first.GetHashCode());
+            Assert.AreEqual(second.GetHashCode(), second.GetHashCode());
+            Assert.AreNotEqual(first.GetHashCode(), second.GetHashCode());
+        }
+
+        [Test]
+        public void TestEquals()
+        {
+            var first = new NmsConnectionInfo(firstId);
+            var second = new NmsConnectionInfo(secondId);
+            
+            Assert.AreEqual(first, first);
+            Assert.AreEqual(second, second);
+            
+            Assert.IsFalse(first.Equals(second));
+            Assert.IsFalse(second.Equals(first));
+        }
+
+        [Test]
+        public void TestIsExplicitClientId()
+        {
+            var info = new NmsConnectionInfo(firstId);
+            Assert.IsFalse(info.IsExplicitClientId);
+            info.SetClientId("something", true);
+            Assert.IsTrue(info.IsExplicitClientId);
+        }
     }
 }
