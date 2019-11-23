@@ -45,7 +45,7 @@ namespace Apache.NMS.AMQP
         private Exception failureCause;
         private readonly object syncRoot = new object();
 
-        public NmsConnection(ConnectionInfo connectionInfo, IProvider provider)
+        public NmsConnection(NmsConnectionInfo connectionInfo, IProvider provider)
         {
             if (provider == null)
             {
@@ -66,7 +66,7 @@ namespace Apache.NMS.AMQP
             }
         }
 
-        public ConnectionInfo ConnectionInfo { get; }
+        public NmsConnectionInfo ConnectionInfo { get; }
 
         private IdGenerator SessionIdGenerator
         {
@@ -194,7 +194,7 @@ namespace Apache.NMS.AMQP
 
             NmsSession session = new NmsSession(this, SessionIdGenerator.GenerateId(), acknowledgementMode)
             {
-                SessionInfo = { requestTimeout = ConnectionInfo.requestTimeout }
+                SessionInfo = { requestTimeout = ConnectionInfo.RequestTimeout }
             };
             try
             {
@@ -268,8 +268,8 @@ namespace Apache.NMS.AMQP
 
         public TimeSpan RequestTimeout
         {
-            get => TimeSpan.FromMilliseconds(ConnectionInfo.requestTimeout);
-            set => ConnectionInfo.requestTimeout = Convert.ToInt64(value.TotalMilliseconds);
+            get => TimeSpan.FromMilliseconds(ConnectionInfo.RequestTimeout);
+            set => ConnectionInfo.RequestTimeout = Convert.ToInt64(value.TotalMilliseconds);
         }
 
         public AcknowledgementMode AcknowledgementMode { get; set; }

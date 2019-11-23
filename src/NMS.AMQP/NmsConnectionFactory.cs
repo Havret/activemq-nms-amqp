@@ -32,7 +32,7 @@ namespace Apache.NMS.AMQP
         private Uri brokerUri;
 
         private IdGenerator clientIdGenerator;
-        private IdGenerator connectionIdGenerator;
+        private IdGenerator2 connectionIdGenerator;
         private object syncRoot = new object();
 
         public NmsConnectionFactory(string userName, string password)
@@ -76,11 +76,11 @@ namespace Apache.NMS.AMQP
                     }
                 }
 
-                return connectionIdGenerator;
+                return clientIdGenerator;
             }
         }
 
-        private IdGenerator ConnectionIdGenerator
+        private IdGenerator2 ConnectionIdGenerator
         {
             get
             {
@@ -90,7 +90,7 @@ namespace Apache.NMS.AMQP
                     {
                         if (connectionIdGenerator == null)
                         {
-                            connectionIdGenerator = ConnectionIdPrefix != null ? new IdGenerator(ConnectionIdPrefix) : new IdGenerator();
+                            connectionIdGenerator = ConnectionIdPrefix != null ? new IdGenerator2(ConnectionIdPrefix) : new IdGenerator2();
                         }
                     }
                 }
@@ -159,7 +159,7 @@ namespace Apache.NMS.AMQP
         {
             try
             {
-                ConnectionInfo connectionInfo = ConfigureConnectionInfo(userName, password);
+                NmsConnectionInfo connectionInfo = ConfigureConnectionInfo(userName, password);
                 IProvider provider = ProviderFactory.Create(BrokerUri);
                 return new NmsConnection(connectionInfo, provider);
             }
@@ -214,14 +214,14 @@ namespace Apache.NMS.AMQP
             }
         }
 
-        private ConnectionInfo ConfigureConnectionInfo(string userName, string password)
+        private NmsConnectionInfo ConfigureConnectionInfo(string userName, string password)
         {
-            ConnectionInfo connectionInfo = new ConnectionInfo(ConnectionIdGenerator.GenerateId())
+            var connectionInfo = new NmsConnectionInfo(new NmsConnectionId(ConnectionIdGenerator.GenerateId()))
             {
-                username = userName,
-                password = password,
-                remoteHost = BrokerUri,
-                requestTimeout = RequestTimeout,
+                UserName = userName,
+                Password = password,
+                ConfiguredUri = BrokerUri,
+                RequestTimeout = RequestTimeout,
                 SendTimeout = SendTimeout,
                 LocalMessageExpiry = LocalMessageExpiry
             };
