@@ -38,8 +38,8 @@ namespace Apache.NMS.AMQP.Provider.Amqp
 
     public class AmqpConnection : IAmqpConnection
     {
-        private readonly ConcurrentDictionary<Id, AmqpSession> sessions = new ConcurrentDictionary<Id, AmqpSession>();
-        private readonly ConcurrentDictionary<Id, AmqpTemporaryDestination> temporaryDestinations = new ConcurrentDictionary<Id, AmqpTemporaryDestination>();
+        private readonly ConcurrentDictionary<NmsSessionId, AmqpSession> sessions = new ConcurrentDictionary<NmsSessionId, AmqpSession>();
+        private readonly ConcurrentDictionary<NmsTemporaryDestinationId, AmqpTemporaryDestination> temporaryDestinations = new ConcurrentDictionary<NmsTemporaryDestinationId, AmqpTemporaryDestination>();
 
         public AmqpProvider Provider { get; }
         private readonly ITransportContext transport;
@@ -145,7 +145,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             }
         }
 
-        public async Task CreateSession(SessionInfo sessionInfo)
+        public async Task CreateSession(NmsSessionInfo sessionInfo)
         {
             var amqpSession = new AmqpSession(this, sessionInfo);
             await amqpSession.Start().ConfigureAwait(false);
@@ -166,7 +166,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             }
         }
 
-        public AmqpSession GetSession(Id sessionId)
+        public AmqpSession GetSession(NmsSessionId sessionId)
         {
             if (sessions.TryGetValue(sessionId, out AmqpSession session))
             {
@@ -175,9 +175,9 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             throw new InvalidOperationException($"Amqp Session {sessionId} doesn't exist and cannot be retrieved.");
         }
 
-        public void RemoveSession(Id sessionId)
+        public void RemoveSession(NmsSessionId sessionId)
         {
-            sessions.TryRemove(sessionId, out AmqpSession removedSession);
+            sessions.TryRemove(sessionId, out AmqpSession _);
         }
 
         public async Task CreateTemporaryDestination(NmsTemporaryDestination destination)
@@ -192,7 +192,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             return temporaryDestinations.TryGetValue(destination.Id, out AmqpTemporaryDestination amqpTemporaryDestination) ? amqpTemporaryDestination : null;
         }
 
-        public void RemoveTemporaryDestination(Id destinationId)
+        public void RemoveTemporaryDestination(NmsTemporaryDestinationId destinationId)
         {
             temporaryDestinations.TryRemove(destinationId, out _);
         }

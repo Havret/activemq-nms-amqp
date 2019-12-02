@@ -36,10 +36,10 @@ namespace Apache.NMS.AMQP
         private bool disableMessageId;
         private bool disableMessageTimestamp;
 
-        public NmsMessageProducer(Id producerId, NmsSession session, IDestination destination)
+        public NmsMessageProducer(NmsProducerId producerId, NmsSession session, IDestination destination)
         {
             this.session = session;
-            Info = new ProducerInfo(producerId, session.SessionInfo.Id)
+            Info = new NmsProducerInfo(producerId)
             {
                 Destination = destination
             };
@@ -49,7 +49,7 @@ namespace Apache.NMS.AMQP
             session.Add(this);
         }
 
-        public ProducerInfo Info { get; }
+        public NmsProducerInfo Info { get; }
         public IdGenerator MessageIdGenerator { get; } = new CustomIdGenerator(true, "ID", new AtomicSequence());
 
         public void Dispose()

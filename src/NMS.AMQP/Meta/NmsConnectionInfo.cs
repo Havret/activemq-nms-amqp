@@ -2,10 +2,8 @@
 
 namespace Apache.NMS.AMQP.Meta
 {
-    public class NmsConnectionInfo
+    public class NmsConnectionInfo : INmsResource<NmsConnectionId>
     {
-        private readonly NmsConnectionId connectionId;
-
         public NmsConnectionInfo(NmsConnectionId connectionId)
         {
             this.Id = connectionId ?? throw new ArgumentNullException(nameof(connectionId));

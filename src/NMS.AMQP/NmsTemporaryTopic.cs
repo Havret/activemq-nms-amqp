@@ -21,7 +21,7 @@ namespace Apache.NMS.AMQP
 {
     public class NmsTemporaryTopic : NmsTemporaryDestination, ITemporaryTopic
     {
-        public NmsTemporaryTopic(Id resourceId) : base(resourceId)
+        public NmsTemporaryTopic(NmsTemporaryDestinationId temporaryDestinationId) : base(temporaryDestinationId)
         {
         }
 

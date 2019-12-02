@@ -16,6 +16,7 @@
  */
 
 using Apache.NMS.AMQP;
+using Apache.NMS.AMQP.Meta;
 using Apache.NMS.AMQP.Util;
 using NUnit.Framework;
 
@@ -27,8 +28,9 @@ namespace NMS.AMQP.Test
         [Test]
         public void TestTwoTemporaryQueuesWithTheSameAddressesAreEqual()
         {
-            NmsTemporaryQueue temporaryQueue1 = new NmsTemporaryQueue(new Id("test")) { Address = "myTemporaryQueue" };
-            NmsTemporaryQueue temporaryQueue2 = new NmsTemporaryQueue(new Id("test")) { Address = "myTemporaryQueue" };
+            var connectionId = new NmsConnectionId("1");
+            NmsTemporaryQueue temporaryQueue1 = new NmsTemporaryQueue(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTemporaryQueue" };
+            NmsTemporaryQueue temporaryQueue2 = new NmsTemporaryQueue(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTemporaryQueue" };
 
             Assert.AreEqual(temporaryQueue1, temporaryQueue2);
             Assert.AreNotSame(temporaryQueue1, temporaryQueue2);
@@ -38,8 +40,9 @@ namespace NMS.AMQP.Test
         [Test]
         public void TestTwoTemporaryQueuesWithDifferentAddressesAreNotEqual()
         {
-            NmsTemporaryQueue temporaryQueue1 = new NmsTemporaryQueue(new Id("test")) { Address = "myTemporaryQueue" };
-            NmsTemporaryQueue temporaryQueue2 = new NmsTemporaryQueue(new Id("test")) { Address = "myTemporaryQueue2" };
+            var connectionId = new NmsConnectionId("1");
+            NmsTemporaryQueue temporaryQueue1 = new NmsTemporaryQueue(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTemporaryQueue" };
+            NmsTemporaryQueue temporaryQueue2 = new NmsTemporaryQueue(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTemporaryQueue2" };
 
             Assert.AreNotEqual(temporaryQueue1, temporaryQueue2);
             Assert.AreNotEqual(temporaryQueue1.GetHashCode(), temporaryQueue2.GetHashCode());

@@ -136,7 +136,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             Listener = providerListener;
         }
 
-        public Task CreateResource(ResourceInfo resourceInfo)
+        public Task CreateResource(INmsResource resourceInfo)
         {
             switch (resourceInfo)
             {
@@ -154,7 +154,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
                 }
                 case NmsTemporaryDestination temporaryDestination:
                     return connection.CreateTemporaryDestination(temporaryDestination);
-                case TransactionInfo transactionInfo:
+                case NmsTransactionInfo transactionInfo:
                     var amqpSession = connection.GetSession(transactionInfo.SessionId);
                     return amqpSession.BeginTransaction(transactionInfo);
                 default:
@@ -162,17 +162,17 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             }
         }
 
-        public Task DestroyResource(ResourceInfo resourceInfo)
+        public Task DestroyResource(INmsResource resourceInfo)
         {
             switch (resourceInfo)
             {
-                case SessionInfo sessionInfo:
+                case NmsSessionInfo sessionInfo:
                 {
                     AmqpSession session = connection.GetSession(sessionInfo.Id);
                     session.Close();
                     return Task.CompletedTask;
                 }
-                case ConsumerInfo consumerInfo:
+                case NmsConsumerInfo consumerInfo:
                 {
                     AmqpSession session = connection.GetSession(consumerInfo.SessionId);
                     AmqpConsumer consumer = session.GetConsumer(consumerInfo.Id);
@@ -206,7 +206,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             }
         }
 
-        public Task StartResource(ResourceInfo resourceInfo)
+        public Task StartResource(INmsResource resourceInfo)
         {
             switch (resourceInfo)
             {
@@ -220,7 +220,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             }
         }
 
-        public Task StopResource(ResourceInfo resourceInfo)
+        public Task StopResource(INmsResource resourceInfo)
         {
             switch (resourceInfo)
             {
@@ -276,13 +276,13 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             return connection.Unsubscribe(subscriptionName);
         }
 
-        public Task Rollback(TransactionInfo transactionInfo, TransactionInfo nextTransactionInfo)
+        public Task Rollback(NmsTransactionInfo transactionInfo, NmsTransactionInfo nextTransactionInfo)
         {
             var session = connection.GetSession(transactionInfo.SessionId);
             return session.Rollback(transactionInfo, nextTransactionInfo);
         }
 
-        public Task Commit(TransactionInfo transactionInfo, TransactionInfo nextTransactionInfo)
+        public Task Commit(NmsTransactionInfo transactionInfo, NmsTransactionInfo nextTransactionInfo)
         {
             var session = connection.GetSession(transactionInfo.SessionId);
             return session.Commit(transactionInfo, nextTransactionInfo);

@@ -20,12 +20,15 @@ using Apache.NMS.AMQP.Util;
 
 namespace Apache.NMS.AMQP
 {
-    public abstract class NmsTemporaryDestination : ResourceInfo, IDestination
+    public abstract class NmsTemporaryDestination :  IDestination, INmsResource<NmsTemporaryDestinationId>
     {
-        protected NmsTemporaryDestination(Id resourceId) : base(resourceId)
+        protected NmsTemporaryDestination(NmsTemporaryDestinationId temporaryDestinationId)
         {
-            Address = resourceId.ToString();
+            this.Id = temporaryDestinationId;
+            this.Address = temporaryDestinationId.ToString();
         }
+
+        public NmsTemporaryDestinationId Id { get; }
 
         public string Address { get; set; }
         public abstract DestinationType DestinationType { get; }

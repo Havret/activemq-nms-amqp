@@ -30,31 +30,29 @@ namespace Apache.NMS.AMQP
 {
     public class NmsSession : ISession
     {
-        private readonly ConcurrentDictionary<Id, NmsMessageConsumer> consumers = new ConcurrentDictionary<Id, NmsMessageConsumer>();
-        private readonly ConcurrentDictionary<Id, NmsMessageProducer> producers = new ConcurrentDictionary<Id, NmsMessageProducer>();
+        private readonly ConcurrentDictionary<NmsConsumerId, NmsMessageConsumer> consumers = new ConcurrentDictionary<NmsConsumerId, NmsMessageConsumer>();
+        private readonly ConcurrentDictionary<NmsProducerId, NmsMessageProducer> producers = new ConcurrentDictionary<NmsProducerId, NmsMessageProducer>();
 
-        private readonly NestedIdGenerator consumerIdGenerator;
-        private readonly NestedIdGenerator producerIdGenerator;
+        private readonly AtomicLong consumerIdGenerator = new AtomicLong();
+        private readonly AtomicLong producerIdGenerator = new AtomicLong();
         private readonly AtomicBool closed = new AtomicBool();
         private readonly AtomicBool started = new AtomicBool();
 
-        public SessionInfo SessionInfo { get; }
+        public NmsSessionInfo SessionInfo { get; }
         public NmsConnection Connection { get; }
         
         private SessionDispatcher dispatcher;
         private Exception failureCause;
         private readonly AcknowledgementMode acknowledgementMode;
 
-        public NmsSession(NmsConnection connection, Id sessionId, AcknowledgementMode acknowledgementMode)
+        public NmsSession(NmsConnection connection, NmsSessionId sessionId, AcknowledgementMode acknowledgementMode)
         {
             Connection = connection;
             this.acknowledgementMode = acknowledgementMode;
-            SessionInfo = new SessionInfo(sessionId)
+            SessionInfo = new NmsSessionInfo(sessionId)
             {
                 AcknowledgementMode = acknowledgementMode
             };
-            consumerIdGenerator = new NestedIdGenerator("ID:consumer", SessionInfo.Id, true);
-            producerIdGenerator = new NestedIdGenerator("ID:producer", SessionInfo.Id, true);
 
             if (AcknowledgementMode == AcknowledgementMode.Transactional)
                 TransactionContext = new NmsLocalTransactionContext(this);
@@ -100,7 +98,12 @@ namespace Apache.NMS.AMQP
 
         public IMessageProducer CreateProducer(IDestination destination)
         {
-            return new NmsMessageProducer(producerIdGenerator.GenerateId(), this, destination);
+            return new NmsMessageProducer(GetNextProducerId(), this, destination);
+        }
+        
+        private NmsProducerId GetNextProducerId()
+        {
+            return new NmsProducerId(SessionInfo.Id, producerIdGenerator.IncrementAndGet());
         }
 
         public IMessageConsumer CreateConsumer(IDestination destination)
@@ -117,17 +120,22 @@ namespace Apache.NMS.AMQP
         {
             CheckClosed();
 
-            NmsMessageConsumer messageConsumer = new NmsMessageConsumer(consumerIdGenerator.GenerateId(), this, destination, selector, noLocal);
+            NmsMessageConsumer messageConsumer = new NmsMessageConsumer(GetNextConsumerId(), this, destination, selector, noLocal);
             messageConsumer.Init().ConfigureAwait(false).GetAwaiter().GetResult();
             
             return messageConsumer;
+        }
+
+        private NmsConsumerId GetNextConsumerId()
+        {
+            return new NmsConsumerId(SessionInfo.Id, consumerIdGenerator.IncrementAndGet());
         }
 
         public IMessageConsumer CreateDurableConsumer(ITopic destination, string name, string selector, bool noLocal)
         {
             CheckClosed();
 
-            NmsMessageConsumer messageConsumer = new NmsDurableTopicSubscriber(consumerIdGenerator.GenerateId(), this, destination, name, selector, noLocal);
+            NmsMessageConsumer messageConsumer = new NmsDurableTopicSubscriber(GetNextConsumerId(), this, destination, name, selector, noLocal);
             messageConsumer.Init().ConfigureAwait(false).GetAwaiter().GetResult();
 
             return messageConsumer;
@@ -434,7 +442,7 @@ namespace Apache.NMS.AMQP
             dispatcher?.Post(task);
         }
 
-        public NmsMessageConsumer ConsumerClosed(Id consumerId, Exception cause)
+        public NmsMessageConsumer ConsumerClosed(NmsConsumerId consumerId, Exception cause)
         {
             Tracer.Info($"A NMS MessageConsumer has been closed: {consumerId}");
 
@@ -458,7 +466,7 @@ namespace Apache.NMS.AMQP
             return consumer;
         }
 
-        public NmsMessageProducer ProducerClosed(Id producerId, Exception cause)
+        public NmsMessageProducer ProducerClosed(NmsProducerId producerId, Exception cause)
         {
             Tracer.Info($"A NmsMessageProducer has been closed: {producerId}. Cause: {cause}");
 
@@ -611,5 +619,7 @@ namespace Apache.NMS.AMQP
         }
 
         internal bool IsIndividualAcknowledge() => acknowledgementMode == AcknowledgementMode.IndividualAcknowledge;
+        
+        
     }
 }

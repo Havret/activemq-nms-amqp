@@ -16,6 +16,7 @@
  */
 
 using Apache.NMS.AMQP;
+using Apache.NMS.AMQP.Meta;
 using Apache.NMS.AMQP.Util;
 using NUnit.Framework;
 
@@ -27,8 +28,9 @@ namespace NMS.AMQP.Test
         [Test]
         public void TestTwoTemporaryTopicsWithTheSameAddressesAreEqual()
         {
-            NmsTemporaryTopic nmsTopic1 = new NmsTemporaryTopic(new Id("test")) { Address = "myTopic" };
-            NmsTemporaryTopic nmsTopic2 = new NmsTemporaryTopic(new Id("test")) { Address = "myTopic" };
+            var connectionId = new NmsConnectionId("1");
+            NmsTemporaryTopic nmsTopic1 = new NmsTemporaryTopic(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTopic" };
+            NmsTemporaryTopic nmsTopic2 = new NmsTemporaryTopic(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTopic" };
 
             Assert.AreEqual(nmsTopic1, nmsTopic2);
             Assert.AreNotSame(nmsTopic1, nmsTopic2);
@@ -38,8 +40,9 @@ namespace NMS.AMQP.Test
         [Test]
         public void TestTwoTemporaryTopicsWithDifferentAddressesAreNotEqual()
         {
-            NmsTemporaryTopic nmsTopic1 = new NmsTemporaryTopic(new Id("test")) { Address = "myTopic" };
-            NmsTemporaryTopic nmsTopic2 = new NmsTemporaryTopic(new Id("test")) { Address = "myTopic1" };
+            var connectionId = new NmsConnectionId("1");
+            NmsTemporaryTopic nmsTopic1 = new NmsTemporaryTopic(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTopic" };
+            NmsTemporaryTopic nmsTopic2 = new NmsTemporaryTopic(new NmsTemporaryDestinationId(connectionId, 1)) { Address = "myTopic2" };
 
             Assert.AreNotEqual(nmsTopic1, nmsTopic2);
             Assert.AreNotEqual(nmsTopic1.GetHashCode(), nmsTopic2.GetHashCode());

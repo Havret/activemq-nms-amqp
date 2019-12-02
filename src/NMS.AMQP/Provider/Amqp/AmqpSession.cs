@@ -30,11 +30,11 @@ namespace Apache.NMS.AMQP.Provider.Amqp
 {
     public class AmqpSession
     {
-        private readonly ConcurrentDictionary<Id, AmqpConsumer> consumers = new ConcurrentDictionary<Id, AmqpConsumer>();
+        private readonly ConcurrentDictionary<NmsConsumerId, AmqpConsumer> consumers = new ConcurrentDictionary<NmsConsumerId, AmqpConsumer>();
         private readonly ConcurrentDictionary<Id, AmqpProducer> producers = new ConcurrentDictionary<Id, AmqpProducer>();
-        protected readonly SessionInfo SessionInfo;
+        protected readonly NmsSessionInfo SessionInfo;
 
-        public AmqpSession(AmqpConnection connection, SessionInfo sessionInfo)
+        public AmqpSession(AmqpConnection connection, NmsSessionInfo sessionInfo)
         {
             Connection = connection;
             SessionInfo = sessionInfo;
@@ -87,7 +87,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             Connection.RemoveSession(SessionInfo.Id);
         }
 
-        public Task BeginTransaction(TransactionInfo transactionInfo)
+        public Task BeginTransaction(NmsTransactionInfo transactionInfo)
         {
             if (!SessionInfo.IsTransacted)
             {
@@ -122,7 +122,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             producers.TryAdd(producerInfo.Id, amqpProducer);
         }
 
-        public AmqpConsumer GetConsumer(Id consumerId)
+        public AmqpConsumer GetConsumer(NmsConsumerId consumerId)
         {
             if (consumers.TryGetValue(consumerId, out var consumer))
             {
@@ -142,7 +142,7 @@ namespace Apache.NMS.AMQP.Provider.Amqp
             throw new Exception();
         }
 
-        public void RemoveConsumer(Id consumerId)
+        public void RemoveConsumer(NmsConsumerId consumerId)
         {
             consumers.TryRemove(consumerId, out _);
         }

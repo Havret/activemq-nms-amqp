@@ -2,9 +2,9 @@
 
 namespace Apache.NMS.AMQP.Meta
 {
-    public class NmsConnectionId
+    public class NmsConnectionId : INmsResourceId
     {
-        private string value;
+        private readonly string value;
         
         public NmsConnectionId(string connectionId)
         {
@@ -22,5 +22,7 @@ namespace Apache.NMS.AMQP.Meta
             }
             this.value = id.value;
         }
+
+        public override string ToString() => value;
     }
 }
